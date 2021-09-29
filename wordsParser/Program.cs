@@ -1,31 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace wordsParser
 {
     public class Program
     {
+        #region
         private static readonly string rusObscene = "блядь,гандон,говно,говнюк,дерьмо,дрочер,ебало,ебальник,елда,жопа,задрот,залупа,манда,мудак,мудень,муди,мудила,педераст,педерастия,пердун,пидор,пизда,пиздец,хер,хуй,шалава,шлюха,шмара";
-
+        #endregion
 
         private static void Main()
         {
             DateTime start = DateTime.Now;
             Console.WriteLine($"Start at {start.ToLongTimeString()}");
-            Span<string> ob = rusObscene.Split(",").AsSpan();
+            List<string> ob = rusObscene.Split(",").ToList();
             string[] lines = ReadFile("wordsRus.txt");
             List<string> words = new();
             StringBuilder txt = new();
             Console.WriteLine("Progress: ");
-            foreach (string line in lines)
+            var ls = from line in lines where !words.Contains(line) && !ob.Contains(line) && !line.Contains('-') && !line.Contains(' ') select line;
+            foreach (string line in ls)
             {
-                if (!words.Contains(line) && !ob.Contains(line) && !line.Contains('-'))
-                {
-                    words.Add(line);
-                    txt.Append(line + "\n");
-                }
+                words.Add(line);
+                txt.AppendLine(line);
                 Console.Write($"\r{words.Count} out of {lines.Length} words added");
+                Console.Write($" {(new string[] { "|", "/", "-", @"\" })[words.Count / 500 % 4]} ");
             }
             WriteFile("out.txt", txt.ToString());
             DateTime end = DateTime.Now;
